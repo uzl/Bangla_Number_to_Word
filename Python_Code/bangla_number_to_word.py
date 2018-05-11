@@ -134,6 +134,7 @@ def convert_to_bangla_word(number):
         cycle_list = make_cycle_list(tmp_num)
         for num_str in cycle_list:
             slice_list = make_slice_list(num_str)
+            print(slice_list)
             x = prepare_slice_name(slice_list)
             res_list.append(x)
 
@@ -145,12 +146,14 @@ def convert_to_bangla_word(number):
 #___________________________________________ Functions and constants END  ______________________________________________
 
 
-n = convert_to_bangla_word('১২৩২')
-print(n)
 
-n_2 = convert_to_bangla_word('৫১৪২৩২৪৯')
-print(n_2)
+if __name__ == "__main__":
+    n = convert_to_bangla_word('১২৩২')
+    print(n)
 
-n_3 = convert_to_bangla_word('123453')
-print(n_3)
+    n_2 = convert_to_bangla_word('৫১৪২৩২৪৯')
+    print(n_2)
+
+    n_3 = convert_to_bangla_word('123453')
+    print(n_3)
 
