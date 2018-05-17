@@ -55,7 +55,9 @@ function is_deciaml_num(num) {
 }
 
 function is_valide_formate(numStr) {
-    if ( numStr.trim().length == 0 ){ return false; }
+    if (numStr.trim().length == 0) {
+        return false;
+    }
 
     var dotCntr = 1;
     for (var i = 0; i < numStr.length; i++) {
@@ -79,6 +81,18 @@ function is_valide_formate(numStr) {
 
 function convert_to_bng_num(num_str) {
     var bng_num_str = '';
+    var dotPosition = num_str.indexOf('.');
+    if (dotPosition != -1) {
+        var totalDeciamDigitLen = num_str.length - dotPosition
+
+        if (totalDeciamDigitLen == 1) {
+            num_str = num_str.slice(0, dotPosition);
+        }
+        else if (totalDeciamDigitLen > 3) {
+            num_str = num_str.slice(0, dotPosition + 3);
+        }
+    }
+
     for (var i = 0; i < num_str.length; i++) {
         var single_digit = num_str.charAt(i);
         if (single_digit in DIGIT_MAP) {
@@ -118,6 +132,12 @@ function make_cycle_list(bngDigitStr) {
 
 function seperateDecimalAndIntegerPart(numStr) {
     var dotPosition = numStr.indexOf('.');
+
+    if (dotPosition == -1) {
+        dotPosition = numStr.length;
+    }
+
+    console.log(" DOT position " + dotPosition);
     var integerPart = numStr.slice(0, dotPosition);
     var decimalPart = numStr.slice(dotPosition, numStr.length);
 
@@ -136,25 +156,25 @@ function eliminateLeftTwoNumber(bagNumStr) {
 function makeSliceList(numStr) {
     var result_list = [];
 
-    var unFilledLength = SLICE_STAGE_LEN_MAP[numStr.length] - numStr.length ;
+    var unFilledLength = SLICE_STAGE_LEN_MAP[numStr.length] - numStr.length;
     // console.log('Need to fill:  '+unFilledLength);
 
     var complimentStr = '';
-    for (var i=0; i<unFilledLength; i++){
+    for (var i = 0; i < unFilledLength; i++) {
         complimentStr += '০';
     }
 
-    numStr =  complimentStr + numStr;
+    numStr = complimentStr + numStr;
     // console.log('Shaped Number:  '+numStr);
 
     var significant_slice_stage_len = LEN_TO_SLICE_STAGE_MAP[numStr.length];
 
     var totalDigit = numStr.length;
 
-    for (var i=0; i<significant_slice_stage_len; i++){
+    for (var i = 0; i < significant_slice_stage_len; i++) {
         var limit = SLICE_STAGE_RANGE[i + 1];
         // console.log(limit[1]);
-        result_list.push( numStr.slice( totalDigit-limit[0], totalDigit-limit[1]) );
+        result_list.push(numStr.slice(totalDigit - limit[0], totalDigit - limit[1]));
     }
 
     return result_list;
@@ -164,16 +184,16 @@ function makeSliceList(numStr) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function prepareSliceName( sliceList) {
+function prepareSliceName(sliceList) {
     var resResult = [];
 
-    for (var i=0; i<sliceList.length; i++){
+    for (var i = 0; i < sliceList.length; i++) {
         var digit = sliceList[i];
 
         var digitName = BNG_NUM_TO_WORD_MAP[digit];
-        var factorName = prepareFactorName(i+1, digit);
+        var factorName = prepareFactorName(i + 1, digit);
 
-        resResult.push(digitName+ ' '+ factorName);
+        resResult.push(digitName + ' ' + factorName);
 
     }
 
@@ -183,10 +203,10 @@ function prepareSliceName( sliceList) {
 
 function prepareFactorName(index, digit) {
     var factor = '';
-    if (index == 4 ){
+    if (index == 4) {
         return BANGLA_FACTOR_NAME[index];
     }
-    if ( (digit == '০' ) || (digit == '০০' )){
+    if ((digit == '০') || (digit == '০০')) {
         return factor;
     }
 
@@ -196,12 +216,12 @@ function prepareFactorName(index, digit) {
 
 function prpareDecimal(decimalPart) {
     var desimalName = '';
-    if (decimalPart.length>1){
+    if (decimalPart.length > 1) {
         var digit = decimalPart.slice(1, decimalPart.length);
-        if (decimalPart.length==2){
-            digit =  digit+'০';
+        if (decimalPart.length == 2) {
+            digit = digit + '০';
         }
-        if ( (digit == '০' ) || (digit == '০০' )){
+        if ((digit == '০') || (digit == '০০')) {
             desimalName = 'শুন্য পয়সা'
         }
         else {
@@ -233,36 +253,48 @@ function convertToBanglaWord(num) {
 
         cycleList = make_cycle_list(integerPart);
         // console.log('Cycle of Koti: '+ cycleList.length);
-        // console.log(cycleList);
+        console.log(cycleList);
 
-        for (var i =0; i<cycleList.length; i++){
+        var cntr = 0;
+
+        var left2Ditit, numPartList, remainingDigits ;//= numPartList['left2Digits'];
+        for (var i = 0; i < cycleList.length; i++) {
             var perCycleNumber = cycleList[i];
-            var numPartList = eliminateLeftTwoNumber(perCycleNumber);
-            var left2Ditit = numPartList['left2Digits'];
 
-
-            var remainingDigits = numPartList['remainingDigits'];
+            if (cntr === 0){
+                numPartList = eliminateLeftTwoNumber(perCycleNumber);
+                left2Ditit = numPartList['left2Digits'];
+                remainingDigits = numPartList['remainingDigits'];
+            }
+            else {
+                remainingDigits = perCycleNumber;
+            }
             // console.log('Remaining: '+ remainingDigits +'   Left 2 Digits: '  + left2Ditit + '  ');
-            if (remainingDigits.trim().length>0) {
+            if (remainingDigits.trim().length > 0) {
                 var sliceList = makeSliceList(remainingDigits);
                 // console.log(sliceList);
                 x = prepareSliceName(sliceList);
-                for (var i =0; i< x.length; i++){
-                    result_list.push(x[i]);
+                for (var j = 0; j < x.length; j++) {
+                    result_list.push(x[j]);
                 }
             }
-            result_list.push( BNG_NUM_TO_WORD_MAP[left2Ditit] );
+
+            cntr += 1;
             // console.log('' );
         }
+        result_list.push(BNG_NUM_TO_WORD_MAP[left2Ditit]);
 
         var finalResultStr = '';
 
-        for (var i=0; i<result_list.length; i++){
+        for (var i = 0; i < result_list.length; i++) {
             finalResultStr += result_list[i] + ' ';
         }
-
-        finalResultStr += ' টাকা '+ prpareDecimal(decimalPart);
-        console.log(finalResultStr);
+        //console.log( "Final Str len " +  finalResultStr.trim().length + "    " + finalResultStr.trim() );
+        if (finalResultStr.trim().length == 0) {
+            finalResultStr += 'শুন্য'
+        }
+        finalResultStr += ' টাকা ' + prpareDecimal(decimalPart);
+        // console.log(finalResultStr);
         return finalResultStr;
 
     }
@@ -272,13 +304,17 @@ function convertToBanglaWord(num) {
     }
 
 }
+//
+//
+// var raw_num = '    12345678.';
+// console.log('input: ' + raw_num);
+//
+// var res = convertToBanglaWord(raw_num);
+// console.log(res);
+//
 
 
-
-
-
-var raw_num = '    46781.06 ';
-console.log('input: ' + raw_num);
-
-convertToBanglaWord(raw_num);
-
+var sliceList = makeSliceList('১২৩৪৫২২');
+// console.log(sliceList);
+x = prepareSliceName(sliceList);
+console.log( x)
